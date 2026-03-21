@@ -43,6 +43,8 @@ class AIOResponsesTestCase(AsyncTestCase):
             await close_result
 
     def run_async(self, coroutine: Coroutine | Generator):
+        if self.loop.is_running():
+            return self.loop.create_task(coroutine)
         return self.loop.run_until_complete(coroutine)
 
     async def request(self, url: str):
@@ -440,8 +442,12 @@ class AIOResponsesTestCase(AsyncTestCase):
         class CustomClientResponse(ClientResponse):
             pass
 
-        m.get(self.url, body="Test", response_class=CustomClientResponse)
+        m.get(self.url, body="Test")
+        old_class = self.session._response_class  # NOTE: now is not necessary to mock the behaviour in
+        # aioresponses, will inherit from aiohttp
+        self.session._response_class = CustomClientResponse
         resp = await self.session.get(self.url)
+        self.session._response_class = old_class
         self.assertTrue(isinstance(resp, CustomClientResponse))
 
     @aioresponses()
@@ -528,19 +534,19 @@ class AIOResponsesTestCase(AsyncTestCase):
         assert data == body
 
     @aioresponses()
-    def test_assert_not_called(self, m: aioresponses):
+    async def test_assert_not_called(self, m: aioresponses):
         m.get(self.url)
         m.assert_not_called()
-        self.run_async(self.session.get(self.url))
+        await self.session.get(self.url)
         with self.assertRaises(AssertionError):
             m.assert_not_called()
 
     @aioresponses()
-    def test_assert_called(self, m: aioresponses):
+    async def test_assert_called(self, m: aioresponses):
         m.get(self.url)
         with self.assertRaises(AssertionError):
             m.assert_called()
-        self.run_async(self.session.get(self.url))
+        await self.session.get(self.url)
 
         m.assert_called_once()
         m.assert_called_once_with(self.url)

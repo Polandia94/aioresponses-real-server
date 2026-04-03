@@ -11,6 +11,9 @@ The breaking changes will be:
 - the fragments (after #) are not being passed on the request, so will not be compared
 - on a connector exception, aiohttp could retry, so the number of request will not be the same
 - pass timeout don't work
+- you cant raise exceptions exception clienterror
+- the decorathor need to decorate an async function
+- as this mock DNS will not work to mock request to external IPs
 
 
 Added a perf test to compare the performance of the POC with the original aioresponses implementation.

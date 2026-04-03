@@ -1,3 +1,3 @@
-from .core import aioresponses
+from .core import aioresponses, CallbackResult
 
-__all__ = ["aioresponses"]
+__all__ = ["aioresponses", "CallbackResult"]

@@ -188,9 +188,7 @@ class aioresponses:
         family: socket.AddressFamily = socket.AF_INET,
     ) -> list[dict]:
         """Replacement for resolver.resolve() on both resolver classes."""
-        print(f"Resolving {host}:{port} (family {family})")
         target = self._host_map.get(host)
-        print("Host map lookup for", host, "found", target)
         if target is not None:
             target_ip, target_port, repeat = target
             return [
@@ -266,19 +264,13 @@ class aioresponses:
         self.requests[key].append(request)
         if isinstance(self.handlers.get((request.path, request.method)), list):
             if len(self.handlers[(request.path, request.method)]) == 0:
-                print(f"Consuming handler for {request.method} {request.path!r}, no handlers left")
                 handler = None
             else:
-                print("len handlers for", request.path, request.method, len(self.handlers[(request.path, request.method)]))
                 handler = self.handlers[(request.path, request.method)][0]
-                print(f"Consuming handler for {request.method} {request.path!r}, {len(self.handlers[(request.path, request.method)])} left")
                 # we remove the first element of the list, so the next request will match the next handler in the list
                 self.handlers[(request.path, request.method)] = self.handlers[(request.path, request.method)][1:]
-                print("len handlers for", request.path, request.method, len(self.handlers[(request.path, request.method)]))
 
         else:
-            print("Looking up handler for", request.path, request.method)
-            print("Registered handlers:", list(self.handlers.keys()))
             handler = self.handlers.get((request.path, request.method))
         if handler is None:
             # Check if there's a pattern handler for this request

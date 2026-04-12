@@ -284,7 +284,10 @@ class aioresponses:
             ]
             # Check if there's a pattern handler for this request
             for (pattern, method), pattern_handler in self.patterns_handler.items():
-                if any(pattern.match(u) for u in original_urls) and method == request.method:
+                if (
+                    any(pattern.match(u) for u in original_urls)
+                    and method == request.method
+                ):
                     if isinstance(pattern_handler, list):
                         handler = pattern_handler[0]
                         remaining = pattern_handler[1:]
@@ -318,8 +321,13 @@ class aioresponses:
         content_type: str | None = None,
         callback: Callable[[URL | Pattern[str]], CallbackResult] | None = None,
         reason: str | None = None,
+        exception: Exception | None = None,
         **kwargs,
     ) -> None:
+        if exception is not None:
+            # if there is an excpetion, dont add handler, will return a clientDisconnectionError
+            # add some deprecation or similar
+            return
         method = method.upper()
         if isinstance(url, str):
             url = URL(url)
